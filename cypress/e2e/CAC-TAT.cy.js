@@ -2,10 +2,8 @@
 
 
 // Seção 2: Seu primeiro teste escrito com Cypress
-describe('Central de Atendimento ao Cliente TAT', function () {
-    beforeEach(function () {
-        cy.visit('./src/index.html')
-    })
+describe('Central de Atendimento ao Cliente TAT', () => {
+    beforeEach(() => cy.visit('./src/index.html'))
 
     it('verifica o título da aplicação', function () {
         cy.title().should('be.equal', 'Central de Atendimento ao Cliente TAT')
@@ -41,7 +39,7 @@ describe('Central de Atendimento ao Cliente TAT', function () {
         cy.get('#firstName').type('Jéssica')
         cy.get('#lastName').type('Figueiredo')
         cy.get('#email').type('jhessikafeitosa@hotmail.com.br')
-        cy.get('#phone-checkbox').click()
+        cy.get('#phone-checkbox').check()
         cy.get('#open-text-area').type('teste')
         cy.contains('.button', 'Enviar').click()
 
@@ -68,7 +66,7 @@ describe('Central de Atendimento ao Cliente TAT', function () {
 // Seção 4: Selecionando opções em campos de seleção suspensa
 
     it('seleciona um produto (YouTube) por seu texto', function(){
-        cy.get('#product').select('Youtube').should('have.value', 'youtube')
+        cy.get('#product').select('YouTube').should('have.value', 'youtube')
 
     })
 
@@ -87,7 +85,7 @@ describe('Central de Atendimento ao Cliente TAT', function () {
             .should('have.value', 'feedback')
     })
 
-    it.only('marca cada tipo de atendimento', function(){
+    it('marca cada tipo de atendimento', function(){
         cy.get('input[type="radio"]')
             .should('have.length', 3)
             .each(function($radio) {
@@ -96,6 +94,77 @@ describe('Central de Atendimento ao Cliente TAT', function () {
             })
     })
 
+// Seção 6: Marcando e desmarcando inputs do tipo checkbox
+
+    it('marca ambos checkboxes, depois desmarca o último', function(){
+        cy.get('input[type="checkbox"]')
+        .check()
+        .should('be.checked')
+        .last()
+        .uncheck()
+        .should('not.be.checked')
+    })
+
+// Seção 7: Fazendo upload de arquivos com Cypress
+
+    //Métodos de testes do vídeo "Conheça a funcionalidade .selectFile, disponível na versão 9.3.0 do Cypress"
+    it('selects a file for upload', () => {
+        cy.get('input[type="file"]')
+        .selectFile('cypress/fixtures/example.json')
+        .then( input =>{
+            expect (input[0].files[0].name).to.equal('example.json')
+        })
+    })
+
+    it('selects a file for upload simulating a drag-and-drop', () => {
+        cy.get('input[type="file"]')
+        .selectFile('cypress/fixtures/example.json', {action: 'drag-drop'})
+        .then( input => {
+            expect(input[0].files[0].name).to.equal('example.json')
+        })
+    })
+
+    it('selects a file for upload using an aliased fixture', () => {
+        cy.fixture('example.json', {encoding: null}).as('exampleFile')
+        cy.get('input[type="file"]')
+        .selectFile('@exampleFile')
+        .then(input => {
+            expect(input[0].files[0].name).to.equal('example.json')
+        })
+    })
+
+    it('select multiple files for upload', () => {
+        cy.get('input[type="file"]')
+        .selectFile([
+            'cypress/fixtures/example.json',
+            'cypress/fixtures/example.txt'
+        ])
+    })
+//Fim dos métodos de testes do vídeo "Conheça a funcionalidade .selectFile, disponível na versão 9.3.0 do Cypress"
+
+    it('seleciona um arquivo da pasta fixtures', () => {
+        cy.get('input[type="file"]')
+            .should('not.have.value')
+            .selectFile('./cypress/fixtures/example.json')
+            .should(function($input){
+                expect($input[0].files[0].name).to.equal('example.json')
+            })
+    })
+// Seção 8: Lidando com links que abrem em outra aba do navegador
+    it('verifica que a política de privacidade abre em outra aba sem a necessidade de um clique', () => {
+        cy.get('#privacy a').should('have.attr', 'target', '_blank')
+    })
+
+    it('acessa a página da política de privacidade removendo o target e então clicando no link', () => {
+        cy.get('#privacy a')
+        .invoke('removeAttr', 'target')
+        .click()
+
+        cy.contains('Talking About Testing')
+            .should('be.visible')
+    })
+
+   
 })
 
 
